@@ -1,0 +1,34 @@
+--Curriculum Focused Views
+
+--Number of graduated students
+--(This actually determines if someone has taken all required classes for their curriculum)
+select COUNT(*) as Graduated_Students
+from Student s
+--where s.Status=10 --Easy way
+join Term t on t.TermID=s.StartTerm
+join Curriculum cu on cu.Year=t.Year
+where (select COUNT(co.CourseID)
+  	from Course_Curriculum cc
+		join Course co on co.CourseID=cc.CourseID
+		where cc.Year=cu.Year 
+		and exists (select cl.ClassID
+					from Class cl
+					join StudentsInClass sic on sic.ClassID=cl.ClassID
+					where sic.StudentID=s.StudentID 
+					and cl.CourseID=co.CourseID 
+					and sic.passed=1
+					)
+		)=(select COUNT(co.CourseID)
+			from Course_Curriculum cc
+			join Course co on co.CourseID=cc.CourseID
+			)
+
+--Number of dropped out students
+select COUNT(*) as DroppedOut_Students
+from Student s
+where s.Status=5
+
+--Average time in quarters taken for a student (to graduate)
+select (SUM(DIFFERENCE(s.StartTerm,s.EndTerm)*4))/Count(s.StudentID) as AverageQuartersTaken
+from Student s
+where s.Status=10
