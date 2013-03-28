@@ -43,7 +43,7 @@ create table Student (
 StudentID int primary key
 , FirstName varchar(50)
 , LastName varchar(50)
-, Status int -- 1=enrolled, 5=dropped out, 10=graduated
+, Status int DEFAULT 1-- 1=enrolled, 5=dropped out, 10=graduated
 , StartTerm int references Term(TermID)
 , EndTerm int references Term(TermID) --will be null until graduation
 , Age int
