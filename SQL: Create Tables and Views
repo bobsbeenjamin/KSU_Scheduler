@@ -21,6 +21,7 @@ create table Course_PreAndCoReqs (
 CourseID int not null references Course(CourseID)
 , Type int not null -- 1=Pre-req, 2=Co-req
 , Req int not null references Course(CourseID)
+, Primary Key (Req,CourseID)
 )
 
 create table Course_Curriculum (
