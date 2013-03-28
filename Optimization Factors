@@ -1,0 +1,25 @@
+Limiting Factors
+----------------
+Number of Classes
+  A number of Classes may be created up to MAX_NUM_CLASSES
+	MAX_NUM_CLASSES is set by budget constraints
+		MAX_NUM_CLASSES = TOTAL_BUDGET / FACULTY_COST_PER_CLASS
+		Assume that Professors are paid by FACULTY_COST_PER_CLASS * numClassesTaught
+Number of units
+	Each term, Students are given a unit cap
+
+Items to Maximize
+-----------------
+Number of Courses available for each Student
+	Assume that a certain percentage of Students that are able to take a given course will take that course
+	This percentage will probably be determined by the average percentage of Students which has taken this given course in over the past few (3?) terms
+Number of Students in each partially filled Class
+Number of Students that can move to graduation
+
+Items to Minimize
+-----------------
+Number of Classes
+	If one or more Schedules can be created -- with reasonable class availability for each student -- which don't reach MAX_NUM_CLASSES, then the cheapest such Schedule is considered optimal
+Number of Course conflicts
+	A conflict occurs when a given Student can sign up for 2 or more Classes that meet at the same time
+	Or should it be this?: A conflict occurs when a given Student can sign up for 2 or more Courses which have all of their sections meeting at the same time
