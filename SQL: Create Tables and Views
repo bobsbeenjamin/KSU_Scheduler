@@ -10,7 +10,7 @@ create table Curriculum (
 
 --If any of the attributes of a course change, then a new entry should be created
 create table Course (
-CourseID int primary key
+CourseID int identity primary key
 , CourseNumber varchar(8) --Example: CS130
 , Name varchar(20) --Example: Discrete Structures
 , NumUnits int
@@ -30,17 +30,18 @@ Year int not null references Curriculum(Year)
 Primary Key (Year,CourseID)
 )
 
-create table Term ( --Schedule
-TermID int primary key --Consecutive IDs
+create table Term ( --aka: Schedule
+TermID int identity primary key --Consecutive IDs
 , Year int
-, Season char(6)
+, Season char(6) --Possibilities: Summer, Fall, Winter, Spring
 , StartDate date
 , EndDate date
-, Budget decimal(14,2)
+, Budget Money --total allowable faculty cost for the current term
+, UnitCap int --maximum number of units a Student can enroll in
 )
 
 create table Student (
-StudentID int primary key
+StudentID int identity primary key
 , FirstName varchar(50)
 , LastName varchar(50)
 , Status int DEFAULT 1-- 1=enrolled, 5=dropped out, 10=graduated
@@ -50,25 +51,25 @@ StudentID int primary key
 )
 
 create table ClassRoom (
-ClassRoomID int primary key
+ClassRoomID int identity primary key
 , Capacity int
 )
 
 create table Professor (
-ProfessorID int primary key
+ProfessorID int identity primary key
 , FirstName varchar(50)
 , LastName varchar(50)
-, Salary Money
+, Salary Money --in terms of dollars earned per class taught
 , NumClassesCanTeach int
 )
 
 create table Class (
-ClassID int primary key
+ClassID int identity primary key
 , Section int not null
 , WeekDays varchar(9) --Max: SMTWThFSa
-, BeginTime DateTime
+, BeginTime Time
 --EndTime can be calculated from BeginTime and Weekdays in app
-, EndTime DateTime
+, EndTime Time
 , CourseID int not null references Course(CourseID)
 , TermID int not null references Term(TermID)
 , ClassRoomID int references ClassRoom(ClassRoomID)
@@ -78,8 +79,9 @@ ClassID int primary key
 create table StudentsInClass (
 StudentID int not null references Student(StudentID)
 , ClassID int not null references Class(ClassID)
-, grade char(2)
-, passed bit
+, grade char(2) --Examples: A+, B-, C
+, passed bit --Boolean: if true, then the student passed
+, primary key (StudentID, ClassID)
 )
 go
 
