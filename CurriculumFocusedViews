@@ -1,14 +1,17 @@
 --Curriculum Focused Views
+				
+--Do the Graduation status update as a view instead. This view of graduated students may be operated upon. This
+--method is better than updating a status because we won't need to remember to update statuses.
 
---Number of graduated students
---(This actually determines if someone has taken all required classes for their curriculum)
-select COUNT(*) as Graduated_Students
+create view IsGrad as
+(select s.StudentID as Graduates
 from Student s
---where s.Status=10 --Easy way
 join Term t on t.TermID=s.StartTerm
 join Curriculum cu on cu.Year=t.Year
+	--Where the count of courses the student passed is equal to
+	--the count of courses in that student's curriculum
 where (select COUNT(co.CourseID)
-  	from Course_Curriculum cc
+		from Course_Curriculum cc
 		join Course co on co.CourseID=cc.CourseID
 		where cc.Year=cu.Year 
 		and exists (select cl.ClassID
@@ -21,14 +24,126 @@ where (select COUNT(co.CourseID)
 		)=(select COUNT(co.CourseID)
 			from Course_Curriculum cc
 			join Course co on co.CourseID=cc.CourseID
+			where cc.Year=cu.Year
 			)
+)
 
---Number of dropped out students
-select COUNT(*) as DroppedOut_Students
+CREATE VIEW IsDropOut as
+(select s.StudentID as DroppedOut_Students
 from Student s
-where s.Status=5
+	--Where the latest TermID > 3+the latest TermID in which the student
+	--participated in a class (and the student has not already graduated).
+where not exists (select *
+					from IsGrad g
+					where s.StudentID=g.StudentID)
+and (select MAX(t.TermID)
+		from Term t
+		)>3+(select MAX(t.TermID)
+				from Term t
+				join Class cl on cl.TermID=t.TermID
+				join StudentsInClass sic on sic.ClassID=cl.ClassID
+				where sic.StudentID = s.StudentID
+				)
+)
 
---Average time in quarters taken for a student (to graduate)
-select (SUM(DIFFERENCE(s.StartTerm,s.EndTerm)*4))/Count(s.StudentID) as AverageQuartersTaken
+--Number of students who graduated
+select COUNT(*)
+from IsGrad g
+
+--Number of students who dropped out
+select COUNT(*)
+from IsDropOut
+
+
+--EndTerm View
+CREATE VIEW EndTerm as
+select sic.StudentID, MAX(cl.TermID) as LastTerm
+from IsGrad g
+join StudentsInClass sic on sic.StudentID=g.StudentID
+join Class cl on cl.ClassID=sic.ClassID
+group by sic.StudentID
+
+--Average time in quarters it takes a student to graduate
+select AVG(e.LastTerm-s.StartTerm+1) as AvgTermGrad
+from EndTerm e
+join Student s on e.StudentID=s.StudentID
+
+--Minimum amount of quarters it took a student to graduate
+select MIN(e.LastTerm-s.StartTerm+1) as MinTermGrad
+from EndTerm e
+join Student s on e.StudentID=s.StudentID
+
+----Alternate route^
+--WITH myResult as 
+--(select sic.StudentID,MAX(cl.TermID)-MAX(s.StartTerm)+1 as tenure
+--from StudentsInClass sic
+--join Class cl on cl.ClassID=sic.ClassID
+--join Student s on s.StudentID=sic.StudentID
+--group by sic.StudentID)
+--select MIN(tenure) from myResult as MinGradInQuarters
+
+--Maximum amount of quarters it took a student to graduate
+select MAX(e.LastTerm-s.StartTerm+1) as MaxTermGrad
+from EndTerm e
+join Student s on e.StudentID=s.StudentID
+
+--View of Student's Curriculum Year
+CREATE VIEW StudentStartYear as
+select s.StudentID, t.Year
 from Student s
-where s.Status=10
+join Term t on t.TermID=s.StartTerm
+
+--View of Student and corresponding number of units he has taken within his curriculum.
+--If a student has not passed a class in his curriculum, he will not appear in the list.
+CREATE VIEW UnitsCompleted as
+select sic.StudentID, SUM(co.NumUnits) as CompletedUnits
+from StudentsInClass sic
+join Class cl on cl.ClassID=sic.ClassID
+join Course co on co.CourseID=cl.ClassID
+join Course_Curriculum cc on cc.CourseID=co.CourseID
+join StudentStartYear ss on ss.StudentID=sic.StudentID
+where sic.passed=1
+and cc.Year=ss.Year
+group by sic.StudentID
+
+--View of number of units in a curriculum
+CREATE VIEW UnitsInCurriculum as
+select cc.Year,SUM(co.NumUnits) as NumUnits
+from Course_Curriculum cc
+join Course co on co.CourseID=cc.CourseID
+group by cc.Year
+
+--Average number of remaining units required to graduate.
+SELECT AVG(uic.NumUnits-u.CompletedUnits) as AvgUnitsToComplete
+from UnitsCompleted u
+join StudentStartYear ss on ss.StudentID=u.StudentID
+join UnitsInCurriculum uic on uic.Year=ss.Year
+where not exists (select StudentID 
+					from IsGrad
+					where u.StudentID=IsGrad.StudentID)
+					
+--Average Units Completed by Students WHO HAVE NOT GRADUATED
+SELECT AVG(u.CompletedUnits) as AvgUnitsCompleted
+from UnitsCompleted u
+where not exists (select StudentID 
+					from IsGrad
+					where u.StudentID=IsGrad.StudentID)
+
+--Max number of units taken by a student who HAS NOT GRADUATED
+SELECT MAX(u.CompletedUnits) as MaxUnitsCompleted
+from UnitsCompleted u
+where not exists (select StudentID 
+					from IsGrad
+					where u.StudentID=IsGrad.StudentID)
+					
+--Min number of units taken by a student who HAS NOT GRADUATED
+SELECT MIN(u.CompletedUnits) as MinUnitsCompleted
+from UnitsCompleted u
+where not exists (select StudentID 
+					from IsGrad
+					where u.StudentID=IsGrad.StudentID)
+					
+--Classes in a curriculum
+SELECT *
+from Course_Curriculum cc
+join Class cl on cl.CourseID=cc.CourseID
