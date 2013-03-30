@@ -1,0 +1,19 @@
+--Student Focused Views
+
+--Number of classes a student has taken
+Select s.StudentID, COUNT(sic.ClassID) as NumClassesTaken
+from Student s
+left join StudentsInClass sic on sic.StudentID=s.StudentID
+Group by s.StudentID
+
+--For number of units a student has accumulated (within his curriculum), see view UnitsCompleted
+
+--Number of completed units per quarter
+CREATE VIEW CompletedUnitsPerTerm as
+SELECT t.TermID,SUM(co.NumUnits)
+from Term t
+join Class cl on cl.TermID=t.TermID
+join StudentsInClass sic on sic.ClassID=cl.ClassID
+join Course co on co.CourseID=cl.CourseID
+where sic.passed=1 
+group by t.TermID
