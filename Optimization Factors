@@ -25,3 +25,5 @@ Number of Classes
 Number of Course conflicts
 	A conflict occurs when a given Student can sign up for 2 or more Classes that meet at the same time
 	Or should it be this?: A conflict occurs when a given Student can sign up for 2 or more Courses which have all of their sections meeting at the same time
+Facility bottlenecks
+	Bottlenecks occur when large numbers of students start or end classes at the same time in the same building
