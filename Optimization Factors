@@ -2,7 +2,7 @@ Limiting Factors
 ----------------
 Number of Classes
 	A number of Classes may be created up to MAX_NUM_CLASSES
-	MAX_NUM_CLASSES = MAX(MAX_NUM_CLASSES_1, MAX_NUM_CLASSES_2, MAX_NUM_CLASSES_3)
+	MAX_NUM_CLASSES = MIN(MAX_NUM_CLASSES_1, MAX_NUM_CLASSES_2, MAX_NUM_CLASSES_3)
 		1) MAX_NUM_CLASSES_1 = TOTAL_BUDGET / FACULTY_COST_PER_CLASS
 			Assume that Professors are paid by FACULTY_COST_PER_CLASS * numClassesTaught
 		2) MAX_NUM_CLASSES_2 = numOpenClassrooms
@@ -14,9 +14,12 @@ Items to Maximize
 -----------------
 Number of Courses available for each Student
 	Assume that a certain percentage of Students that are able to take a given course will take that course
-	This percentage will probably be determined by the average percentage of Students which has taken this given course in over the past 4 terms
-Number of Students in each partially filled Class
+	This percentage will probably be determined by the average percentage of Students which have taken the given course in over the past 4 terms
 Number of Students that can move to graduation
+	A student can move to graduation if they are able to take all remaining required courses for their curriculum:
+		Seniors must not exceed their unit cap in order to take these Courses
+		All such Courses must be offered in such a way that some certain setup of sections does not have conflicting time slots
+		When all seniors meet the above reqs, they must not overfill the ClassRooms that house the Classes involved
 
 Items to Minimize
 -----------------
@@ -27,3 +30,4 @@ Number of Course conflicts
 	Or should it be this?: A conflict occurs when a given Student can sign up for 2 or more Courses which have all of their sections meeting at the same time
 Facility bottlenecks
 	Bottlenecks occur when large numbers of students start or end classes at the same time in the same building
+Number of open seats in all ClassRooms combined
