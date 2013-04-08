@@ -1,0 +1,20 @@
+-- Optimization
+create view MaxNumClasses_BudgetContraints AS (
+  select distinct 
+	   Salary
+	   -- Change literal number below based on actual budget
+	   , 100000/Salary as NumClassesAllowedByBudget
+	from Professor 
+);
+
+create view MaxNumClasses_OpenClassRooms AS (
+	select SUM(ClassRoomID) as NumOpenClassRooms
+	from ClassRoom
+	where Capacity=1
+);
+
+create view MaxNumClasses_ProfessorsCanTeach AS (
+   select SUM(NumClassesCanTeach) as NumClassesCanTeachTotal
+   from Professor
+);
+-- End of file
