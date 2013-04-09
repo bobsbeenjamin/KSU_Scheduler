@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Space</title>
+</head>
+
+<body>
+
+//THIS IS USER INPUT FORUM
+
+<form action = "index.php" method=  "POST">
+
+<label>First</label>
+<input name = "name" type = "text" placeholder="What's in a name?" value="text4"/>
+<label>Second</label>
+<input name = "lastName" type = "text" placeholder="What's in a name?"/>
+
+<input type = "submit" name = "btnSubmit" value = "Submit"/>
+<div id="push"></div>
+</form>
+
+//SENDS THE INPUT DATA THROUGH PHP TO DATABASE
+
+<?php
+        // Establish database connection
+        $connect = mysql_connect('localhost','root','root');
+        if (!$connect)
+        {
+          die('Uh-oh. Could not connect: ' . mysql_error());
+        }      
+        mysql_select_db("space", $connect);
+        // Check form entries
+        //$human = $_POST['human'];   --security           
+        // (&& $human == '5') --security
+          // mysql_escape_string() allows apostrophes
+          $name = mysql_escape_string($_POST['name']);
+          $lastName = mysql_escape_string($_POST['lastName']);               
+          // Insert form values
+          mysql_query("INSERT INTO dragon (name, lastName)
+          VALUES ('$name', '$lastName')");              
+          // Database connection is closed below after pulling comments
+         /*else if ($_POST['submit'] && $human != '5') {
+          $error = "You answered the anti-spam question incorrectly!
+          <br/><br/>The answer was 5, silly.<br/>Please go back and ";
+        } */
+ ?>
+
+//THIS IS WHERE DATA IS PULLED FROM THE SITE; LOOP IS USED HERE
+
+<?php
+  session_start();
+
+	$server = 'localhost';
+	$db_username = 'root';
+	$db_password = 'root';
+	$database = 'space';
+	
+	if(!mysql_connect($server, $db_username, $db_password)){
+		die('could not connect to the mySQL database');
+	}
+
+	if(!mysql_select_db($database)){
+		die('could not connect to the database');
+	}
+	
+	$result = mysql_query("SELECT * FROM dragon");
+	while($row = mysql_fetch_array($result))
+              {
+                echo "<h4>Name: " . $row['name'] . "<br/>" . $row['lastName'] . "</h4>";
+                //echo "<br/>";
+              }   
+?>
+
+</body>
+</html>
