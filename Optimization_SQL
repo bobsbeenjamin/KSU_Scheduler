@@ -1,20 +1,22 @@
 -- Optimization
-create view MaxNumClasses_BudgetContraints AS (
-  select distinct 
-	   Salary
-	   -- Change literal number below based on actual budget
-	   , 100000/Salary as NumClassesAllowedByBudget
-	from Professor 
+-- ------------
+-- This will return results for all Terms; use where clause to get current Term
+create view MaxNumClasses as (
+   select 
+      t.Budget
+      , (select distinct t.Budget/Salary 
+         from Professor
+         ) as NumClassesAllowedByBudget
+      , (select COUNT(ClassRoomID)
+         from ClassRoom
+         where Available=1
+         ) as NumOpenClassRooms
+      , (select SUM(NumClassesCanTeach)
+         from Professor
+         ) as NumClassesProfessorsCanTeach
+   from Term t
+   group by t.Budget
+   -- where Term.Budget=MAX(Term.Budget)
 );
 
-create view MaxNumClasses_OpenClassRooms AS (
-	select SUM(ClassRoomID) as NumOpenClassRooms
-	from ClassRoom
-	where Capacity=1
-);
-
-create view MaxNumClasses_ProfessorsCanTeach AS (
-   select SUM(NumClassesCanTeach) as NumClassesCanTeachTotal
-   from Professor
-);
 -- End of file
