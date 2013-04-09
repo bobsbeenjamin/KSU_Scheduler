@@ -10,7 +10,7 @@ create table Curriculum (
 )
 --If any of the attributes of a course change, then a new entry should be created
 create table Course (
-    CourseID		int			primary key
+	  CourseID		int			primary key
 	, CourseNumber  varchar(8)	 --Example: CS130
 	, Name			varchar(40)	 --Example: Discrete Structures
 	, NumUnits		int
@@ -53,7 +53,7 @@ create table Student (
 	,FirstName			varchar(15)			not NULL
 	,LastName			varchar(25)			not NULL
 	,Address			varchar(100)	
-	,PhoneNum			varchar(14)			not NULL
+	,PhoneNum			varchar(13)			not NULL
 	,DOB				date				not NULL
 	,StartTerm			int		references Term(TermID)
 )
