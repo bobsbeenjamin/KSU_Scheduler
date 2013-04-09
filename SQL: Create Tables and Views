@@ -3,136 +3,131 @@ create database KSU_ClassScheduler
 go
 
 use KSU_ClassScheduler
+go
 
 create table Curriculum (
   Year int primary key
 )
-
 --If any of the attributes of a course change, then a new entry should be created
 create table Course (
-CourseID int identity primary key
-, CourseNumber varchar(8) --Example: CS130
-, Name varchar(20) --Example: Discrete Structures
-, NumUnits int
-, Description varchar(255)
+    CourseID		int			primary key
+	, CourseNumber  varchar(8)	 --Example: CS130
+	, Name			varchar(40)	 --Example: Discrete Structures
+	, NumUnits		int
+	, Description	varchar(500)
 )
-
+-- Req is the required or co-required course for CourseID
 create table Course_PreAndCoReqs (
-CourseID int not null references Course(CourseID)
-, Type int not null -- 1=Pre-req, 2=Co-req
-, Req int not null references Course(CourseID)
-, Primary Key (Req,CourseID)
+	 CourseID		int		not null references Course(CourseID)
+	,Type			int		not null -- 1=Pre-req, 2=Co-req
+	,Req			int		not null references Course(CourseID)
+	,Primary Key (Req,CourseID)
 )
-
 create table Course_Curriculum (
-Year int not null references Curriculum(Year)
-, CourseID int not null references Course(CourseID)
-Primary Key (Year,CourseID)
+	 Year			int		not null references Curriculum(Year)
+	,CourseID		int		not null references Course(CourseID)
+	,Primary Key (Year,CourseID)
 )
-
 create table Term ( --aka: Schedule
-TermID int identity primary key --Consecutive IDs
-, Year int
-, Season char(6) --Possibilities: Summer, Fall, Winter, Spring
-, StartDate date
-, EndDate date
-, Budget Money --total allowable faculty cost for the current term
-, UnitCap int --maximum number of units a Student can enroll in
+	 TermID			int			primary key
+	,Year			int
+	,Season			varchar(6)			--Possibilities: Summer, Fall, Winter, Spring
+	,StartDate		date
+	,EndDate		date
+	,Budget			Money			--total allowable faculty cost for the current term
+	,UnitCap		int				--maximum number of units a Student can enroll in
 )
-
-create table Student (
-StudentID int identity primary key
-, FirstName varchar(50)
-, LastName varchar(50)
-, Status int DEFAULT 1-- 1=enrolled, 5=dropped out, 10=graduated
-, StartTerm int references Term(TermID)
-, EndTerm int references Term(TermID) --will be null until graduation
-, Age int
-)
-
 create table ClassRoom (
-ClassRoomID int identity primary key
-, Capacity int
+	ClassRoomID		int		primary key
+	, Capacity		int
 )
-
 create table Professor (
-ProfessorID int identity primary key
-, FirstName varchar(50)
-, LastName varchar(50)
-, Salary Money --in terms of dollars earned per class taught
-, NumClassesCanTeach int
+	 ProfessorID		int  primary key
+	,FirstName			varchar(50)
+	,LastName			varchar(50)
+	,Salary				Money
+	,NumClassesCanTeach int
 )
-
+create table Student (
+	 StudentID			int		primary key
+	,FirstName			varchar(15)			not NULL
+	,LastName			varchar(25)			not NULL
+	,Address			varchar(100)	
+	,PhoneNum			varchar(14)			not NULL
+	,DOB				date				not NULL
+	,StartTerm			int		references Term(TermID)
+)
 create table Class (
-ClassID int identity primary key
-, Section int not null
-, WeekDays varchar(9) --Max: SMTWThFSa
-, BeginTime Time
---EndTime can be calculated from BeginTime and Weekdays in app
-, EndTime Time
-, CourseID int not null references Course(CourseID)
-, TermID int not null references Term(TermID)
-, ClassRoomID int references ClassRoom(ClassRoomID)
-, ProfessorID int references Professor(ProfessorID)
+	 ClassID			int					primary key
+	, Section			int					not null
+	, WeekDays			varchar(9) --Max: SMTWThFSa
+	, BeginTime			Time
+	--EndTime can be calculated from BeginTime and Weekdays in app
+	, EndTime			Time
+	, CourseID			int				not null references Course(CourseID)
+	, TermID			int				not null references Term(TermID)
+	, ClassRoomID		int						 references ClassRoom(ClassRoomID)
+	, ProfessorID		int						 references Professor(ProfessorID)
 )
-
 create table StudentsInClass (
-StudentID int not null references Student(StudentID)
-, ClassID int not null references Class(ClassID)
-, grade char(2) --Examples: A+, B-, C
-, passed bit --Boolean: if true, then the student passed
-, primary key (StudentID, ClassID)
+	 StudentID			int				not null references Student(StudentID)
+	,ClassID			int				not null references Class(ClassID)
+	,grade				char(2)			--Example: A+, B-, C
+	,passed				bit				--Boolean: if true, then the student passed
+	,Primary key (StudentID, ClassID)
 )
+--------------------------------------------------------------------------------------
 go
 
 create view CurriculumWithCourseDetails AS (
-select
-cc.Year
-, c.CourseNumber
-, c.Name
-, c.NumUnits
-from Course c
-join Course_Curriculum cc on c.CourseID=cc.CourseID
-where Year=2013 --fill in actual year in app
+	select 
+		cc.Year
+		, c.CourseNumber
+		, c.Name
+		, c.NumUnits
+	from Course c
+	join Course_Curriculum cc on c.CourseID=cc.CourseID
+	where Year=2013 --fill in actual year in app
 )
 go
 
 create view TermWithClassDetails AS (
-select
-t.Season
-, t.Year
-, co.CourseNumber
-, cl.Section
-, co.NumUnits
-, p.FirstName AS ProfessorFirstName
-, p.LastName AS ProfessorLastName
-, cl.ClassRoomID
-from Term t
-join Class cl on t.TermID=cl.TermID
-join Course co on cl.CourseID=co.CourseID
-join Professor p on cl.ProfessorID=p.ProfessorID
-where t.TermID=51 --fill in actual term in app
+	select 
+		t.Season
+		, t.Year
+		, co.CourseNumber
+		, cl.Section
+		, co.NumUnits
+		, p.FirstName AS ProfessorFirstName
+		, p.LastName AS ProfessorLastName
+		, cl.ClassRoomID
+	from Term t
+	join Class cl on t.TermID=cl.TermID
+	join Course co on cl.CourseID=co.CourseID
+	join Professor p on cl.ProfessorID=p.ProfessorID
+	where t.TermID=51 --fill in actual term in app
 )
 go
 
 create view ClassDetails AS (
-select
-co.CourseNumber
-, cl.Section
-, t.Season
-, t.Year
-, cl.WeekDays
-, cl.BeginTime
-, cl.EndTime
-, co.NumUnits
-, p.FirstName AS ProfessorFirstName
-, p.LastName AS ProfessorLastName
-, cl.ClassRoomID
-from Class cl
-join Course co on cl.CourseID=co.CourseID
-join Term t on cl.TermID=t.TermID
-join Professor p on cl.ProfessorID=p.ProfessorID
-where cl.ClassID=51 --fill in actual class in app
+	select 
+		co.CourseNumber
+		, cl.Section
+		, t.Season
+		, t.Year
+		, cl.WeekDays
+		, cl.BeginTime
+		, cl.EndTime
+		, co.NumUnits
+		, p.FirstName AS ProfessorFirstName
+		, p.LastName AS ProfessorLastName
+		, cl.ClassRoomID
+	from Class cl
+	join Course co on cl.CourseID=co.CourseID
+	join Term t on cl.TermID=t.TermID
+	join Professor p on cl.ProfessorID=p.ProfessorID
+	where cl.ClassID=51 --fill in actual class in app
 )
 go
---End of file
+--End of file as of initial creation on 3/26/13@21:40
+
