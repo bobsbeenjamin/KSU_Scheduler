@@ -6,14 +6,41 @@ from Student s
 left join StudentsInClass sic on sic.StudentID=s.StudentID
 Group by s.StudentID
 
---For number of units a student has accumulated (within his curriculum), see view UnitsCompleted
+--Number of completed units per quarter for students who have completed any units.
+CREATE VIEW SubCompletedUnitsPerTermPerStudent as
+SELECT s.StudentID, t.TermID, SUM(co.NumUnits) as UnitsCompleted
+from Student s
+left join StudentsInClass sic on sic.StudentID=s.StudentID
+left join Class cl on cl.ClassID=sic.ClassID
+left join Course co on co.CourseID=cl.CourseID
+left join Term t on t.TermID=cl.TermID
+--where sic.passed=1
+group by s.StudentID, t.TermID
 
---Number of completed units per quarter
-CREATE VIEW CompletedUnitsPerTerm as
-SELECT t.TermID,SUM(co.NumUnits)
-from Term t
-join Class cl on cl.TermID=t.TermID
-join StudentsInClass sic on sic.ClassID=cl.ClassID
-join Course co on co.CourseID=cl.CourseID
-where sic.passed=1 
-group by t.TermID
+--Number of completed units per quarter for all students (even those who have 0 units completed).
+CREATE VIEW AllCompletedUnitsPerTermPerStudent as
+select s.StudentID, scu.TermID, (case when scu.UnitsCompleted is null then 0 
+  							else scu.UnitsCompleted end) as UnitsCompleted
+from Student s
+left join SubCompletedUnitsPerTermPerStudent scu on scu.StudentID=s.StudentID
+
+--Number of completed units per student
+CREATE VIEW StudentCompletedUnits as
+SELECT a.StudentID, SUM(a.UnitsCompleted) as TotalUnitsCompleted
+from AllCompletedUnitsPerTermPerStudent a
+group by a.StudentID
+
+--Average Number of units taken each quarter per student
+SELECT a.StudentID, AVG(a.UnitsCompleted) as AvgUnitsCompleted
+from AllCompletedUnitsPerTermPerStudent a
+group by a.StudentID
+
+
+--Minimum number of quarters required to graduate
+--(assuming 20 units is unit cap per term)
+SELECT s.StudentID, (SUM(u.NumUnits)-SUM(a.UnitsCompleted))/20 + 1
+from Student s
+join AllCompletedUnitsPerTermPerStudent a on a.StudentID=s.StudentID
+join StudentStartYear ss on ss.StudentID=s.StudentID
+join UnitsInCurriculum u on u.Year=ss.Year
+group by s.StudentID
