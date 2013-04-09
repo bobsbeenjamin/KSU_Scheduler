@@ -1,0 +1,36 @@
+--Class Focused Views
+
+--Total Number of classes offered
+SELECT COUNT(cl.ClassID) as TotalNumClasses
+from Class cl
+
+--Number of Students by year that attend classes
+SELECT COUNT(s.StudentID) as FirstYearStudents
+from Student s
+join StudentsInClass sic on sic.StudentID=s.StudentID
+join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+where scu.TotalUnitsCompleted<45
+
+SELECT COUNT(s.StudentID) as SecondYearStudents
+from Student s
+join StudentsInClass sic on sic.StudentID=s.StudentID
+join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+where scu.TotalUnitsCompleted<90 and scu.TotalUnitsCompleted>=45
+
+SELECT COUNT(s.StudentID) as ThirdYearStudents
+from Student s
+join StudentsInClass sic on sic.StudentID=s.StudentID
+join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+where scu.TotalUnitsCompleted<135 and scu.TotalUnitsCompleted>=90
+
+SELECT COUNT(s.StudentID) as FourthYearStudents
+from Student s
+join StudentsInClass sic on sic.StudentID=s.StudentID
+join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+where scu.TotalUnitsCompleted<180 and scu.TotalUnitsCompleted>=135
+
+SELECT COUNT(s.StudentID) as FifthYearStudents
+from Student s
+join StudentsInClass sic on sic.StudentID=s.StudentID
+join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+where scu.TotalUnitsCompleted>180
