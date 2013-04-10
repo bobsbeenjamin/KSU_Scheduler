@@ -20,3 +20,57 @@ create view MaxNumClasses as (
 );
 
 -- End of file
+
+--MiscViews
+
+--This query shows the ratio of students that participated
+--in a class/students that could have participated in that class
+SELECT t.TermID, co.CourseID, 
+(select COUNT(s.StudentID)
+   from Student s
+	join StudentsInClass sic on sic.StudentID=s.StudentID
+	join Class cl on cl.ClassID=sic.ClassID
+	join Course c on c.CourseID=cl.CourseID
+	where c.CourseID=co.CourseID and cl.TermID=t.TermID
+	)/(select SUM(ccs.NumStudents)
+		from CoursesClassesStudentsCanTake ccs
+		where ccs.CourseID=co.CourseID
+			and t.TermID=ccs.TermID) as NumStudents
+from Term t
+join Class cl on cl.TermID=t.TermID
+join Course co on co.CourseID=cl.CourseID
+go
+
+CREATE VIEW CoursesClassesStudentsCanTake as
+SELECT t.TermID,
+co.CourseID,
+cl.ClassID,
+(select COUNT(s.StudentID)
+	from Student s
+	join StudentsInClass sic on sic.StudentID=s.StudentID
+	where cl.ClassID=sic.ClassID
+		and not exists (select d.DropOuts
+						from StudentsDroppedOut d
+						where d.DropOuts=s.StudentID
+						)
+		and not exists (select cl.ClassID
+						from Class cl
+						join StudentsInClass sic on sic.ClassID=cl.ClassID
+						where cl.CourseID=co.CourseID and s.StudentID=sic.StudentID
+							and cl.TermID<t.TermID and sic.passed=1
+						)
+		and (select COUNT(p.Req)
+			from Course_PreAndCoReqs p
+			where p.Type=1
+			and p.CourseID=co.CourseID)=(select COUNT(cl.ClassID)
+										from Class cl
+										join StudentsInClass sic on sic.ClassID=cl.ClassID
+										where cl.CourseID=co.CourseID
+											and s.StudentID=sic.StudentID)
+											and cl.TermID<t.TermID
+											and sic.passed=1
+	) as NumStudents
+from Term t
+join Class cl on cl.TermID=t.TermID
+join Course co on co.CourseID=cl.CourseID
+go
