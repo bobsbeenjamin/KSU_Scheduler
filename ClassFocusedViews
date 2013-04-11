@@ -34,3 +34,39 @@ from Student s
 join StudentsInClass sic on sic.StudentID=s.StudentID
 join StudentCompletedUnits scu on scu.StudentID=s.StudentID
 where scu.TotalUnitsCompleted>180
+
+--ViewToEndAllViews
+CREATE VIEW ClassFocusedView as
+SELECT t.TermID,
+  COUNT(cl.ClassID) as TotalNumClasses,
+	(SELECT COUNT(s.StudentID)
+		from Student s
+		join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+		where sic.StudentID=s.StudentID
+			and scu.TotalUnitsCompleted<45) as FirstYearStudents,
+	(SELECT COUNT(s.StudentID)
+		from Student s
+		join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+		where scu.TotalUnitsCompleted<90
+			and scu.TotalUnitsCompleted>=45
+			and sic.StudentID=s.StudentID) as SecondYearStudents,
+	(SELECT COUNT(s.StudentID)
+		from Student s
+		join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+		where scu.TotalUnitsCompleted<135
+			and scu.TotalUnitsCompleted>=90
+			and sic.StudentID=s.StudentID) as ThirdYearStudents,
+	(SELECT COUNT(s.StudentID)
+		from Student s
+		join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+		where scu.TotalUnitsCompleted<180
+			and scu.TotalUnitsCompleted>=135
+			and sic.StudentID=s.StudentID) as FourthYearStudents,
+	(SELECT COUNT(s.StudentID)
+		from Student s
+		join StudentCompletedUnits scu on scu.StudentID=s.StudentID
+		where scu.TotalUnitsCompleted>180
+			and sic.StudentID=s.StudentID) as FifthYearStudents
+from Term t
+join Class cl on cl.TermID=t.TermID
+join StudentsInClass sic on sic.ClassID=cl.ClassID
