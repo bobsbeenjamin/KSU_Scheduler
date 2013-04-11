@@ -1,21 +1,20 @@
--- Beginning of file
 create database KSU_ClassScheduler
+go
 
 use KSU_ClassScheduler
+go
 
 create table Curriculum (
-	Year int primary key
+  Year int primary key
 )
-
 --If any of the attributes of a course change, then a new entry should be created
 create table Course (
 	  CourseID		int			primary key
-	, CourseNumber  varchar(8)	 -- Example: CS130
-	, Name			varchar(40)	 -- Example: Discrete Structures
+	, CourseNumber  varchar(8)	 --Example: CS130
+	, Name			varchar(40)	 --Example: Discrete Structures
 	, NumUnits		int
 	, Description	varchar(500)
 )
-
 -- Req is the required or co-required course for CourseID
 create table Course_PreAndCoReqs (
 	 CourseID		int		not null references Course(CourseID)
@@ -23,37 +22,31 @@ create table Course_PreAndCoReqs (
 	,Req			int		not null references Course(CourseID)
 	,Primary Key (Req,CourseID)
 )
-
 create table Course_Curriculum (
 	 Year			int		not null references Curriculum(Year)
 	,CourseID		int		not null references Course(CourseID)
 	,Primary Key (Year,CourseID)
 )
-
-create table Term ( -- aka: Schedule
+create table Term ( --aka: Schedule
 	 TermID			int			primary key
 	,Year			int
-	,Season			varchar(6)			-- Possibilities: Summer, Fall, Winter, Spring
+	,Season			varchar(6)			--Possibilities: Summer, Fall, Winter, Spring
 	,StartDate		date
 	,EndDate		date
-	,Budget			decimal(12,2)		-- Total allowable faculty cost for the current term
-	,UnitCap		int					-- Maximum number of units a Student can enroll in
+	,Budget			Money			--total allowable faculty cost for the current term
+	,UnitCap		int				--maximum number of units a Student can enroll in
 )
-
 create table ClassRoom (
 	ClassRoomID		int		primary key
 	, Capacity		int
-	, Available 	bit 	-- Boolean: false if classroom is not currently available for instruction
 )
-
 create table Professor (
 	 ProfessorID		int  primary key
 	,FirstName			varchar(50)
 	,LastName			varchar(50)
-	,Salary				decimal(10,2)
+	,Salary				Money
 	,NumClassesCanTeach int
 )
-
 create table Student (
 	 StudentID			int		primary key
 	,FirstName			varchar(15)			not NULL
@@ -63,12 +56,11 @@ create table Student (
 	,DOB				date				not NULL
 	,StartTerm			int		references Term(TermID)
 )
-
 create table Class (
 	 ClassID			int					primary key
 	, Section			int					not null
-	, WeekDays			varchar(9) -- Max: SMTWThFSa
-	, BeginTime			time
+	, WeekDays			varchar(9) --Max: SMTWThFSa
+	, BeginTime			Time
 	--EndTime can be calculated from BeginTime and Weekdays in app
 	, EndTime			Time
 	, CourseID			int				not null references Course(CourseID)
@@ -76,15 +68,15 @@ create table Class (
 	, ClassRoomID		int						 references ClassRoom(ClassRoomID)
 	, ProfessorID		int						 references Professor(ProfessorID)
 )
-
 create table StudentsInClass (
 	 StudentID			int				not null references Student(StudentID)
 	,ClassID			int				not null references Class(ClassID)
-	,grade				char(2)			-- Examples: A+, B-, C
-	,passed				bit				-- Boolean: if true, then the student passed
+	,grade				char(2)			--Example: A+, B-, C
+	,passed				bit				--Boolean: if true, then the student passed
 	,Primary key (StudentID, ClassID)
 )
--- -----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+go
 
 create view CurriculumWithCourseDetails AS (
 	select 
@@ -95,7 +87,8 @@ create view CurriculumWithCourseDetails AS (
 	from Course c
 	join Course_Curriculum cc on c.CourseID=cc.CourseID
 	where Year=2013 --fill in actual year in app
-);
+)
+go
 
 create view TermWithClassDetails AS (
 	select 
@@ -112,7 +105,8 @@ create view TermWithClassDetails AS (
 	join Course co on cl.CourseID=co.CourseID
 	join Professor p on cl.ProfessorID=p.ProfessorID
 	where t.TermID=51 --fill in actual term in app
-);
+)
+go
 
 create view ClassDetails AS (
 	select 
@@ -132,6 +126,7 @@ create view ClassDetails AS (
 	join Term t on cl.TermID=t.TermID
 	join Professor p on cl.ProfessorID=p.ProfessorID
 	where cl.ClassID=51 --fill in actual class in app
-);
--- End of file as of 4/9@20:18
+)
+go
+--End of file as of initial creation on 3/26/13@21:40
 
