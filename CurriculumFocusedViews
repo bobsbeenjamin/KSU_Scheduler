@@ -163,3 +163,55 @@ group by u.Year
 SELECT *
 from Course_Curriculum cc
 join Class cl on cl.CourseID=cc.CourseID
+go
+
+--View containing all required metrics for Curriculum Focused Views
+CREATE VIEW CurriculumFocusedView as
+SELECT t.Year,
+	(select COUNT(*)
+		from StudentsGraduated g
+		join Student s on s.StudentID=g.Graduates
+		join Term a on a.TermID=s.StartTerm
+		where t.Year=a.Year) as NumGraduates,
+	(select COUNT(*)
+		from StudentsDroppedOut d
+		join Student s on s.StudentID=d.DropOuts
+		join Term a on a.TermID=s.StartTerm
+		where t.Year=a.Year) as NumDropOuts,
+	(select AVG(e.LastTerm-s.StartTerm+1)
+		from EndTerm e
+		join Student s on e.StudentID=s.StudentID
+		join Term a on a.TermID=s.StartTerm
+		where t.Year=a.Year) as AvgTermsToGrad,
+	(select	MIN(e.LastTerm-s.StartTerm+1)
+		from EndTerm e
+		join Student s on e.StudentID=s.StudentID
+		join Term a on a.TermID=s.StartTerm
+		where t.Year=a.Year) as MinTermsToGrad,
+	(select MAX(e.LastTerm-s.StartTerm+1)
+		from EndTerm e
+		join Student s on e.StudentID=s.StudentID
+		join Term a on a.TermID=s.StartTerm
+		where t.Year=a.Year) as MaxTermGrad,
+	(select AVG(uic.NumUnits-u.CompletedUnits)
+		from AllUnitsCompleted u 
+		join StudentStartYear ss on ss.StudentID=u.StudentID
+		join UnitsInCurriculum uic on uic.Year=ss.Year
+		where
+			not exists
+				(select u.StudentID 
+				from StudentsGraduated g
+				where u.StudentID=g.Graduates)
+			and
+				t.Year=uic.Year) as AvgUnitsToComplete,
+	(SELECT AVG(u.CompletedUnits)
+		from AllUnitsCompleted u
+		where u.Year=t.Year) as AvgUnitsCompleted,
+	(SELECT MAX(u.CompletedUnits)
+		from AllUnitsCompleted u
+		where u.Year=t.Year) as MaxUnitsCompleted,
+	(SELECT MIN(u.CompletedUnits)
+		from AllUnitsCompleted u
+		where u.Year=t.Year) as MinUnitsCompleted
+from Term t
+group by t.Year
