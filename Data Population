@@ -1,132 +1,634 @@
-create database KSU_ClassScheduler
-go
-
 use KSU_ClassScheduler
-go
 
-create table Curriculum (
-  Year int primary key
-)
---If any of the attributes of a course change, then a new entry should be created
-create table Course (
-	  CourseID		int			primary key
-	, CourseNumber  varchar(8)	 --Example: CS130
-	, Name			varchar(40)	 --Example: Discrete Structures
-	, NumUnits		int
-	, Description	varchar(500)
-)
--- Req is the required or co-required course for CourseID
-create table Course_PreAndCoReqs (
-	 CourseID		int		not null references Course(CourseID)
-	,Type			int		not null -- 1=Pre-req, 2=Co-req
-	,Req			int		not null references Course(CourseID)
-	,Primary Key (Req,CourseID)
-)
-create table Course_Curriculum (
-	 Year			int		not null references Curriculum(Year)
-	,CourseID		int		not null references Course(CourseID)
-	,Primary Key (Year,CourseID)
-)
-create table Term ( --aka: Schedule
-	 TermID			int			primary key
-	,Year			int
-	,Season			varchar(6)			--Possibilities: Summer, Fall, Winter, Spring
-	,StartDate		date
-	,EndDate		date
-	,Budget			Money			--total allowable faculty cost for the current term
-	,UnitCap		int				--maximum number of units a Student can enroll in
-)
-create table ClassRoom (
-	ClassRoomID		int		primary key
-	, Capacity		int
-)
-create table Professor (
-	 ProfessorID		int  primary key
-	,FirstName			varchar(50)
-	,LastName			varchar(50)
-	,Salary				Money
-	,NumClassesCanTeach int
-)
-create table Student (
-	 StudentID			int		primary key
-	,FirstName			varchar(15)			not NULL
-	,LastName			varchar(25)			not NULL
-	,Address			varchar(100)	
-	,PhoneNum			varchar(13)			not NULL
-	,DOB				date				not NULL
-	,StartTerm			int		references Term(TermID)
-)
-create table Class (
-	 ClassID			int					primary key
-	, Section			int					not null
-	, WeekDays			varchar(9) --Max: SMTWThFSa
-	, BeginTime			Time
-	--EndTime can be calculated from BeginTime and Weekdays in app
-	, EndTime			Time
-	, CourseID			int				not null references Course(CourseID)
-	, TermID			int				not null references Term(TermID)
-	, ClassRoomID		int						 references ClassRoom(ClassRoomID)
-	, ProfessorID		int						 references Professor(ProfessorID)
-)
-create table StudentsInClass (
-	 StudentID			int				not null references Student(StudentID)
-	,ClassID			int				not null references Class(ClassID)
-	,grade				char(2)			--Example: A+, B-, C
-	,passed				bit				--Boolean: if true, then the student passed
-	,Primary key (StudentID, ClassID)
-)
---------------------------------------------------------------------------------------
-go
+INSERT INTO Curriculum VALUES 
+   (2010)
+  ,(2011)
+  ,(2012)
+  ,(2013)
+  
+  
+  INSERT INTO Course VALUES
+	-- English courses
+	 (10110,'GE101','Oral Communication',4,'GE-101 is designed to provide students with an understanding of factors affecting human communication on a day-to-day basis and to provide laboratory experiences aimed at developing skills in such areas as language, listening, assertiveness, conflict resolution, nonverbal behaviors, group problem solving, and cross cultural communication.')
+	,(10210,'GE102','Writing Skills',4,'GE-102 is a foundation course in critical reading and writing skills. Through their writing, students learn to analyze, synthesize, organize information logically, and propose original ideas. Students will also receive instruction in research and MLA documentation and will be required to complete a fully documented research paper')
+	,(10310,'GE103','Critical Thinking',4,'GE-103 helps students to develop their critical thinking and writing skills beyond the level achieved in GE-102. Writing forms and strategies are taught within the contexts of contemporary ideas and cultural diversity as reflected in selected readings.' )
+	-- Other GE-s
+	,(10410,'GE104','Visual Art',4,'GE-104 is designed to familiarize students with art, and be able to appreciate it. In order to achieve these goals the students will have hands on experience, visit art galleries, and also study some selective artworks')
+	,(10510,'GE105','Philosophy',4,'GE-105 is an overview of the classical and modern problems of philosophy. A consideration of the nature of knowledge, views of the cosmos or world, and the problems of truth, beauty, ethics, and theology.')
+	,(10610,'GE106','Foreign Language',4,'GE-106 is to teach students another language rather than English in a practical manner, so later the students wll benefit of knowing aditional language.')
+	,(10710,'GE107','U.S. History-1',4,'GE-107 is a survey course that looks in depth at United States history from the colonial period to Reconstruction. The English colonies, the Revolutionary War, the Constitution, the New Nation, Jeffersonian and Jacksonian democracy, slavery, Civil War, and Reconstruction will all be examined.')
+	,(10812,'GE108','U.S. History-2',4,'GE-108 is a survey course that looks in depth at United States History from the Post-Reconstruction period to the present. The Gilded Age, Populism and Progressivism, Imperialism, the Great Depression and New Deal, World War II, the Cold War, Vietnam, Watergate, and the Reagan years will all be examined.')
+	,(10910,'GE109','Macroeconomics',4,'GE-109 is a fundamental course in economic analysis. Emphasis is placed on theories of output determination, consumption, investment, inflation, unemployment, and fiscal and monetary policy. Other selected topics may include international balance of payments, growth and development, and urban problems.')
+	,(11010,'GE110','Social Science',4,'GE-110 examines the inter-relationship of the social sciences and their application to the problem of group living in the twentieth century through a survey of the principal facts and concepts of political science and economics.The student is led to acquire a body of knowledge through an analysis of contemporary political and economic problems.')
+	--Physics
+	,(20110,'PHY201','Physics 201',4,'PHY-201 involves the study of mechanics and properties of matter. The course is an intensive study of motion, dynamics and statics, oscillations, wave motion, and sound, with emphasis upon vector analytical methods.')
+	,(20210,'PHY202','Physics 202',4,'PHY-202 is an introductory Electricity and Magnetism course on a science and engineering level.')
+	,(20311,'PHY203','Physics 203',4,'PHY-203 covers heat, thermodynamics, optics, and modern physics and involves an intensive study of the concepts of fluids, temperature, heat, calorimetry, heat transfer, thermodynamics, entropy, and kinetic theory. The course focuses on a thorough presentation of geometrical and physical optics with considerable emphasis on modern physics including quantum physics, wave mechanics, and special relativity.')
+	--Mathematics
+	,(30110,'MAT301','Calculus I',4,'MAT-301 is the first of a sequence of three courses combining the subject matter of analytic geometry and calculus. Functions and their graphs are studied with special attention to differentiation, limits, rules and integration using various techniques. Applications of both differentiation and integration are covered.')
+	,(30210,'MAT302','Calculus II',4,'MAT-302 is a study of transcendental functions, techniques of integration, polar coordinates, parametric equations, conic sections, indeterminate forms and infinite series')
+	,(30310,'MAT303','Multivaliable Calculus',4,'MAT-303 is a course in vector calculus. Topics covered include vector functions, vector differentiation, parametric equations, vectors in three and higher dimensional space, multiple integration, and an introduction to vector analysis including divergence, curl, and Stoke Theorem')
+	,(30410,'MAT304','Linear Algebra',4,'MAT-304 covers the topics of vector spaces, linear transformations and matrices, matrix algebra, determinents, eigenvalues and eigenvectors, and solutions of systems of equations.')
+	,(30513,'STA','Statistics for Computer Science',4,'STA is a course for statistical methods for computer scientists')
+	--CS courses
+	,(40110,'CS401','Discrete Structures',4,'CS-401 gives an introduction to formal logic: Propositional Logic, First-order Logic, and their calculi, as well as basic principles of recursion and analysis of algorithms. It will also present basic principles of sets, relations, and Combinatorics. Finally, it will cover basic properties of graphs and graph-associated algorithms.')
+	,(40210,'CS402','Intro to Computer Science',4,'CS-402 includes basic concepts of Computer Science, including hardware and software. Problem-solving methods. Programming in an object-oriented language.')
+	,(40310,'CS403','Intro to Prog and Prob Solv',4,'CS-403 introduces design, implementation, documentation and testing of programs in an object-oriented language. Modularization and reusability of software. File I/O and exception handling.')
+	,(40410,'CS404','Computer Logic',4,'CS-404 is about boolean algebra with applications to computers and logic design. The Arithmetic Logical Unit, logical properties of flip-flops and sequential machines. Applied projects.')
+	,(40510,'CS405','Data Structures I',4,'CS-405 is about abstract data types and their implementations. Linked and array-based data structures. Lists, stacks, queues. Recursion. Hashing and searching. Analysis of algorithms.')
+	,(40610,'CS406','Data Structures II',4,'CS-406 is about trees, priority queues, graphs, sets, and maps. Sorting algorithms. Random access, indexed and direct files. Indexing techniques.')
+	,(40710,'CS407','C++ Programming',4,'CS-407 is about class encapsulation, inheritance, polymorphism, object storage management, and exception handling. Standard template library including template classes and generic algorithms. Software reuse and object-oriented programming.')
+	,(40810,'CS408','Assembly Programming',4,'CS-408 is about Von Neumann machine. Instruction set architecture. Addressing modes. Assembly programming. Arrays and records. Subroutines and macros. I/O and interrupts. Interfacing and communication.')
+	,(40910,'CS409','Translation and Automata',4,'CS-409 is an introduction to language translation. Regular expressions. Finite automata. Lexical analysis. Context-free grammars and push down automata. Syntax analysis.')
+	,(41010,'CS410','Algorithms',5,'CS-410 is about algorithm design techniques including divide-and-conquer, the greedy method, dynamic programming, backtracking, and branch-and-bound. Analysis of sorting and searching. Tractability. Complexity analysis using basic asymptotic notation.')
+	,(41110,'CS411','Computer Architecture',4,'CS-411 is about abstraction, encapsulation, modularity and hierarchy. Structural and behavioral diagrams. Implementation and programming of system design. Comprehensive examples using a case study approach.')
+	,(41210,'CS412','Programming Languages',4,'CS-412 is about virtual machines and abstraction. Syntax and semantics. Declarations and types. Scoping and binding. Data abstraction. Control abstraction. Run-time organization. Programming paradigms.')
+	,(41310,'CS413','Operating Systems',4,'CS-413 is an overview of operating systems. Operating system structures. Process management. Concurrency and synchronization. Deadlock. Processor management. Scheduling and dispatch. Memory management. Virtual memory. Device management. File systems. Security, privacy and acceptable use.')
+	,(41410,'CS414','Software Engineering',5,'CS-414 models the software development process and metrics. Software requirements and specifications. Methodologies, tools and environments. Human-computer interaction. Software design and architecture. Project management. Cost estimation. Testing and validation. Maintenance and evolution.')
+	,(41510,'CS415','Database Systems',4,'CS-415 is about database system fundamentals, data models, including Entity-Relationship model, relational model and object-oriented model. Theory of database design and data manipulation processes using relational algebra and calculus. SQL in programming.')
+	,(41610,'CS416','Object Oriented Programming',4,'CS-416 elements of the object model. Abstraction, encapsulation, modularity and hierarchy. Structural and behavioral diagrams. Implementation and programming of system design. Comprehensive examples using a case study approach.')
+	,(41710,'CS417','Parallel Processing',4,'CS-417 is about taxonomy of concurrent and parallel systems. Communication and synchronization, multicomputer and multiprocessor systems. Shared memory and message passing programming paradigms; parallel problem solving.')
+	,(41810,'CS418','Computer Networks',4,'CS-418 is about network architectures and standards. Layers and protocols. Circuit switching, packet switching and routing. Client-server concepts. Network security. Web computing. Privacy, intellectual property rights and acceptable use.')
+	,(41910,'CS419','Artificial Intelligence',4,'CS-419 is an overview of the different application areas of AI. Introduction to basic AI concepts and techniques such as heuristic search, knowledge representation, automated reasoning. In-depth discussion of several AI application areas: their specific problems, tools and techniques.')
+	,(42011,'CS420','Software Engineering Practice',4,'CS-420 is team and project-oriented software engineering. Practice in the handson process of software production and quality control. Documentation and management methods for analysis, design, implementation and testing phases of software production. Focus on issues of system integration and engineering, testing, and maintenance.')
+	,(42110,'CS421','Undergraduate Seminar',3,'CS-421 is technical presentations by students on current developments in computer science. Essays on seminar topics.')
+-------------------------------------------------------------------------------------
+--Populating the pre/co-req
+-------------------------------------------------------------------------------------
+--English pre/co-req
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (10110,1,10210)
+	,(10310,1,10210)
+	,(10310,2,10110)
+--GE pre/co-req
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (10410,1,10210)
+	,(10510,1,10210)
+	,(10610,1,10210)
+	,(10710,1,10210)
+	,(10812,1,10210)
+	,(10812,1,10710)
+	,(10910,1,10210)
+	,(11010,1,10210)
+--Mathematics pre/co-req
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (30210,1,30110)
+	,(30310,1,30110)
+	,(30310,1,30210)
+	,(30410,1,30110)
+	,(30410,1,30210)
+	,(30410,1,30310)
+	,(30513,1,30110)
+	,(30513,1,30210)
+--Physics Pre/Co-req
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (20110,1,30110)
+	,(20110,2,30210)
+	,(20210,1,20110)
+	,(20210,1,30110)
+	,(20210,1,30210)
+	,(20210,2,30310)
+	,(20311,1,20110)
+	,(20311,1,30110)
+	,(20311,1,30210)
+	,(20311,2,30310)
+	--CS coursec pre/co-req
+--40310
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (40310,1,40210)
+	,(40310,1,30110)
+--41510
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41510,1,40210)
+	,(41510,1,40310)
+	,(41510,1,40510)
+	,(41510,1,40110)
+	,(41510,1,30110)
+	,(41510,1,40610)
+--40710
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (40710,1,40210)
+	,(40710,1,40310)
+	,(40710,1,30110)
+--40510
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (40510,1,40210)
+	,(40510,1,40310)
+	,(40510,1,40110)
+	,(40510,1,30110)
+--40610
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (40610,1,40210)
+	,(40610,1,40310)
+	,(40610,1,40510)
+	,(40610,1,40110)
+	,(40610,1,30110)
+--40410
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (40410,1,40110)
+--40810
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (40810,1,40110)
+	,(40810,1,40410)
+	,(40810,1,40510)
+	,(40810,1,40310)
+	,(40810,1,40210)
+	,(40810,1,30110)
+--41110
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41110,1,40110)
+	,(41110,1,40410)
+	,(41110,1,40510)
+	,(41110,1,40310)
+	,(41110,1,40210)
+	,(41110,1,30110)
+	,(41110,1,40810)
+--41310
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41310,1,40110)
+	,(41310,1,40410)
+	,(41310,1,40510)
+	,(41310,1,40310)
+	,(41310,1,40210)
+	,(41310,1,30110)
+	,(41310,1,40810)
+	,(41310,1,41110)
+	,(41310,1,40610)
+--41210
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41210,1,40210)
+	,(41210,1,40310)
+	,(41210,1,40510)
+	,(41210,1,40110)
+	,(41210,1,30110)
+	,(41210,1,40610)
+--40910
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (40910,1,40210)
+	,(40910,1,40310)
+	,(40910,1,40510)
+	,(40910,1,40110)
+	,(40910,1,30110)
+	,(40910,1,40610)
+--41610
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41610,1,40210)
+	,(41610,1,40310)
+	,(41610,1,40510)
+	,(41610,1,40110)
+	,(41610,1,30110)
+	,(41610,1,40610)
+--41810
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41810,1,40210)
+	,(41810,1,40310)
+	,(41810,1,40510)
+	,(41810,1,40110)
+	,(41810,1,30110)
+	,(41810,1,40610)
+--41010
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41010,1,40210)
+	,(41010,1,40310)
+	,(41010,1,40510)
+	,(41010,1,40110)
+	,(41010,1,30110)
+	,(41010,1,40610)
+	,(41010,1,30210)
+--41410
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41410,1,40210)
+	,(41410,1,40310)
+	,(41410,1,40510)
+	,(41410,1,40110)
+	,(41410,1,30110)
+	,(41410,1,40610)
+	,(41410,1,30210)
+	,(41410,1,41010)
+	,(41410,1,41610)
+--42011
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (42011,1,40210)
+	,(42011,1,40310)
+	,(42011,1,40510)
+	,(42011,1,40110)
+	,(42011,1,30110)
+	,(42011,1,40610)
+	,(42011,1,30210)
+	,(42011,1,41010)
+	,(42011,1,41610)
+	,(42011,1,41410)
+	,(42011,1,41510)
+--41710
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41710,1,40210)
+	,(41710,1,40310)
+	,(41710,1,40510)
+	,(41710,1,40110)
+	,(41710,1,30110)
+	,(41710,1,40610)
+	,(41710,1,30210)
+	,(41710,1,41010)
+	,(41710,1,40410)
+	,(41710,1,40810)
+	,(41710,1,41110)
+	,(41710,1,41310)
+--42110
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (42110,1,40210)
+	,(42110,1,40310)
+	,(42110,1,40510)
+	,(42110,1,40110)
+	,(42110,1,30110)
+	,(42110,1,40610)
+	,(42110,1,30210)
+	,(42110,1,41010)
+	,(42110,1,40410)
+	,(42110,1,40810)
+	,(42110,1,41110)
+	,(42110,1,41310)
+--41910
+INSERT INTO Course_PreAndCoReqs VALUES
+	 (41910,1,40210)
+	,(41910,1,40310)
+	,(41910,1,40510)
+	,(41910,1,40110)
+	,(41910,1,30110)
+	,(41910,1,40610)
+	,(41910,1,30210)
+	,(41910,1,41010)
+	,(41910,1,40410)
+	,(41910,1,40810)
+	,(41910,1,41110)
+	,(41910,1,41310)
+	,(41910,2,41710)
+	
+-------------------------------------------------------------------------------------
+--Populating Course_Curriculum
+-------------------------------------------------------------------------------------
+INSERT INTO Course_Curriculum VALUES
+	 (2010,10110)
+	,(2010,10210)
+	,(2010,10310)
+	,(2010,10410)
+	,(2010,10510)
+	,(2010,10610)
+	,(2010,10710)
+	,(2010,10910)
+	,(2010,11010)
+	,(2010,30110)
+	,(2010,30210)
+	,(2010,30310)
+	,(2010,30410)
+	,(2010,20110)
+	,(2010,20210)
+	,(2010,40110)
+	,(2010,40210)
+	,(2010,40310)
+	,(2010,40410)
+	,(2010,40510)
+	,(2010,40610)
+	,(2010,40710)
+	,(2010,40810)
+	,(2010,40910)
+	,(2010,41010)
+	,(2010,41110)
+	,(2010,41210)
+	,(2010,41310)
+	,(2010,41410)
+	,(2010,41510)
+	,(2010,41610)
+	,(2010,41710)
+	,(2010,41810)
+	,(2010,41910)
+	,(2010,42110)
+INSERT INTO Course_Curriculum VALUES	
+	 (2011,10110)
+	,(2011,10210)
+	,(2011,10310)
+	,(2011,10410)
+	,(2011,10510)
+	,(2011,10610)
+	,(2011,10710)
+	,(2011,10910)
+	,(2011,11010)
+	,(2011,30110)
+	,(2011,30210)
+	,(2011,30310)
+	,(2011,30410)
+	,(2011,20110)
+	,(2011,20210)
+	,(2011,20311)
+	,(2011,40110)
+	,(2011,40210)
+	,(2011,40310)
+	,(2011,40410)
+	,(2011,40510)
+	,(2011,40610)
+	,(2011,40710)
+	,(2011,40810)
+	,(2011,40910)
+	,(2011,41010)
+	,(2011,41110)
+	,(2011,41210)
+	,(2011,41310)
+	,(2011,41410)
+	,(2011,41510)
+	,(2011,41610)
+	,(2011,41710)
+	,(2011,41810)
+	,(2011,41910)
+	,(2011,42110)
+	
+INSERT INTO Course_Curriculum VALUES
+	 (2012,10110)
+	,(2012,10210)
+	,(2012,10310)
+	,(2012,10410)
+	,(2012,10510)
+	,(2012,10610)
+	,(2012,10710)
+	,(2012,10812)
+	,(2012,10910)
+	,(2012,11010)
+	,(2012,30110)
+	,(2012,30210)
+	,(2012,30310)
+	,(2012,30410)
+INSERT INTO Course_Curriculum VALUES
+	 (2012,20110)
+	,(2012,20210)
+	,(2012,20311)
+	,(2012,40110)
+	,(2012,40210)
+	,(2012,40310)
+	,(2012,40410)
+	,(2012,40510)
+	,(2012,40610)
+	,(2012,40710)
+	,(2012,40810)
+	,(2012,40910)
+	,(2012,41010)
+	,(2012,41110)
+	,(2012,41210)
+	,(2012,41310)
+	,(2012,41410)
+	,(2012,41510)
+	,(2012,41610)
+	,(2012,41710)
+	,(2012,41810)
+	,(2012,41910)
+	,(2012,42110)
+INSERT INTO Course_Curriculum VALUES
+	 (2013,10110)
+	,(2013,10210)
+	,(2013,10310)
+	,(2013,10410)
+	,(2013,10510)
+	,(2013,10610)
+	,(2013,10710)
+	,(2013,10812)
+	,(2013,10910)
+	,(2013,11010)
+	,(2013,30110)
+	,(2013,30210)
+	,(2013,30310)
+	,(2013,30410)
+	,(2013,30513)
+	,(2013,20110)
+	,(2013,20210)
+	,(2013,20311)
+	,(2013,40110)
+	,(2013,40210)
+	,(2013,40310)
+	,(2013,40410)
+	,(2013,40510)
+	,(2013,40610)
+	,(2013,40710)
+	,(2013,40810)
+	,(2013,40910)
+	,(2013,41010)
+	,(2013,41110)
+	,(2013,41210)
+	,(2013,41310)
+	,(2013,41410)
+	,(2013,41510)
+	,(2013,41610)
+	,(2013,41710)
+	,(2013,41810)
+	,(2013,41910)
+	,(2013,42110)
+-------------------------------------------------------------------------------------
+--Populating Term
+-------------------------------------------------------------------------------------
+INSERT INTO Term (TermID,Year,Season,StartDate,EndDate,Budget,UnitCap)
+	VALUES
+ 	 (1,2010,'FALL','2010-10-04','2010-12-17',350000.00,17)
+	,(2,2010,'WINTER','2011-01-03','2011-03-18',350000.00,17)
+	,(3,2010,'SPRING','2011-03-28','2011-06-10',350000.00,17)
+	,(4,2010,'SUMMER','2011-06-20','2011-09-02',250000.00,12)
+	,(5,2011,'FALL','2011-10-03','2011-12-16',350000.00,18)
+	,(6,2011,'WINTER','2012-01-02','2012-03-16',350000.00,18)
+	,(7,2011,'SPRING','2012-03-26','2012-06-08',350000.00,18)
+	,(8,2011,'SUMMER','2012-06-18','2012-08-31',250000.00,12)
+	,(9,2012,'FALL','2012-10-01','2012-12-14',400000.00,18)
+	,(10,2012,'WINTER','2013-01-07','2013-03-22',400000.00,18)
+	,(11,2012,'SPRING','2013-04-01','2013-06-14',400000.00,18)
+	,(12,2012,'SUMMER','2013-06-24','2013-09-06',250000.00,12)
+	,(13,2013,'FALL','2013-10-07','2013-12-20',450000.00,20)
+	,(14,2013,'WINTER','2014-01-06','2014-03-21',450000.00,20)
+	,(15,2013,'SPRING','2014-03-31','2014-06-13',450000.00,20)
+	,(16,2013,'SUMMER','2014-06-23','2014-09-05',300000.00,12)
+-------------------------------------------------------------------------------------
+--Populating ClassRoom
+-------------------------------------------------------------------------------------
+INSERT INTO ClassRoom VALUES
+	 (1,6)
+	,(2,6)	
+	,(3,6)
+	,(4,6)
+	,(5,6)
+-------------------------------------------------------------------------------------
+--Populating Professor
+-------------------------------------------------------------------------------------	
+INSERT INTO Professor VALUES
+	 (201001,'Daisy', 'Sang',8300.00,3)
+	,(201002,'Barry', 'Soroka',8300.00,3)
+	,(201003,'Craig', 'Rich',8300.00,3)
+	,(201101,'Lan','Yang',8300.00,3)
+	,(201102,'Gilbert','Young',8300.00,3)
+	,(201201,'Amar', 'Raheja',8300.00,3)
+	,(201301,'Alex','Smith',6500.00,2)
+-------------------------------------------------------------------------------------
+--Populating Student
+-------------------------------------------------------------------------------------
+-- 2010 entered students
+INSERT INTO Student VALUES
+	 (1,'John', 'Smith','221 North Cedar St.  Delamr 41152','(212)244-2908','1989-10-12',1)
+	,(2,'Krista', 'Miller',' 343 South Helen St. #44 Kenmar Kr. 41393','(212)388-0928','1989-07-25',1)
+	,(3,'Jason',' Thompson','998 Louis St #10 Maple Kr. 41282','(212)663-0903','1988-11-11',1)
+	,(4,'Thomas',' Underwood','144 Spooner Dr. Rosco Kr. 41991','(212)313-3020','1988-08-20',1)
+	,(5,'Lucy',' Anderson','833 Sunflower St. Barker Kr. 41909','(212)922-4342','1988-03-14',1)
+	,(6,'Alexander',' Scott',' 136 West Palmer St. Louvel Kr. 41566','(212)388-0929','1987-06-15',1)
+	,(7,'Tom','Smith',' 271 Randy St. Cox Kr. 41959','(212)334-4421','1988-05-06',5)
+	,(8,'Phillip',' Sanderson',' 334 South Apple St. Getty Kr. 41998','(212)299-0876','1987-10-20',1)
+	,(9,'Sam',' Johnson',' 727 Georgia Road St. Austin Kr. 41392','(212)827-0287','1987-04-16',1)
+	,(10,'Chris',' Lopez',' 239 West Lee St. Kanter Kr. 41999','(212)309-2910','1987-09-02',1)
+--2011 entered students
+INSERT INTO Student VALUES
+	 (11,'Joel',' Andy',' 197 South Camper St. Fort Kr. 41902','(212)209-1092','1986-10-08',5)
+	,(12,'Kim',' Hector',' 229 West Vince St. Sumter Kr. 41392','(212)440-2196','1990-10-13',5)
+	,(13,'Jade',' Washington',' 108 South Cole St. Dallas Kr. 41096','(212)298-2871','1990-02-25',5)
+	,(14,'Suzy',' Smith',' 295 East Oak St. Pasadena Kr. 41983','(212)331-1377','1990-08-14',5)
+	,(15,'Kelly',' Adams',' 339 South Camper St. Newton Kr. 41229','(212)929-9091','1989-04-21',5)
+	,(16,'Suzanna',' Elizabeth',' 455 Adams St. Counter Kr. 41228','(212)229-8771','1989-11-02',5)
+	,(17,'Tommy',' Morgan',' 271 Randy St. Cox Kr. 41959','(212)334-4421','1988-05-06',5)
+	,(18,'Kyle',' Reed',' 872 South Sam St. Eastmoor Kr. 41399','(212)442-4999','1988-07-10',5)
+	,(19,'Jared',' Stevens',' 332 West Hampton St. Longmoor Kr. 41991','(212)991-2445','1988-1-08',5)
+	,(20,'Vince',' West',' 538 East Anderson St. Kilberg Kr. 41234','(212)335-3092','1985-05-23',5)	
+--2012 entered students
+INSERT INTO Student VALUES
+	 (21,'Palm',' Mills',' 492 Kyle St. Feewood Kr. 41903','(212)494-1909','1986-11-08',9)
+	,(22,'Nina','Ford','210 Louis St. Oakwood Kr. 41022','(212)290-3341','1991-04-05',9)
+	,(23,'Lily','Stone','553 East Ross St. Runs Kr. 41430','(212)882-3319','1991-3-27',9)
+	,(24,'Kimberly','Hicks','310 West Hunter St. Coldington Kr. 41399','(212)109-9213','1990-08-19',9)
+	,(25,'Nicole', 'Hunter','North Elm St. Burlington Kr. 41220','(212)300-2133','1990-12-10',9)
+	,(26,'Samantha','Warner','West Summer St. Star Kr. 41331','(212)442-1908','1987-01-15',9)
+	,(27,'Wyatt','Lucas','Erikson St. Fisher Kr. 41928','(212)221-3929','1987-07-02',9)
+	,(28,'Eliot','Love',' Castle St. Deadhorse Kr. 41339','(212)992-1908','1986-07-04',9)
+	,(29,'Drew','Lincoln','Cold St. #12 Landman Kr. 41229','(212)339-0918','1986-11-11',9)
+	,(30,'Austin','Wally','Spring St. #9 Underworld Kr. 41096','(212)669-2919','1986-10-13',9)
+--2013 entered students
+INSERT INTO Student VALUES
+	 (31,'Anna','Case','North Fall St. #49 Sumter Kr. 41449','(212)339-1988','1986-10-03',13)
+	,(32,'Nora','Casey','West Counters St. #3 Fishing Kr. 41224','(212)921-1319','1992-03-16',13)
+	,(33,'Randy','West','East Seaman St. Outback Kr. 41330','(212)330-9918','1992-05-08',13)
+	,(34,'Jenny','Hull','South Penny St. #40 Long Kr. 41927','(212)422-2919','1992-11-26',13)
+	,(35,'Ariel','Hampton','West Ham St. Sounds Kr. 41199','(212)129-9102','1991-05-24',13)
+	,(36,'Peter','Atkins','South Lanter St. Rosewich Kr. 41339','(212)221-0019','1991-08-18',13)
+	,(37,'Lynn','Gilmore','East Mary St. #22 Longer Kr. 41928','(212)991-9081','1990-06-27',13)
+	,(38,'James','Glenn','West Swim St. #19 Ware Kr. 41009','(212)234-0199','1989-07-20',13)
+	,(39,'John','Katz','South Lane St. #18 Wick Kr. 41928','(212)937-8038','1989-02-03',13)
+	,(40,'Maddi','Strong','Coolie St. #2 Rings Kr. 41904','(212)828-1081','1988-10-10',13)
 
-create view CurriculumWithCourseDetails AS (
-	select 
-		cc.Year
-		, c.CourseNumber
-		, c.Name
-		, c.NumUnits
-	from Course c
-	join Course_Curriculum cc on c.CourseID=cc.CourseID
-	where Year=2013 --fill in actual year in app
-)
-go
+-------------------------------------------------------------------------------------
+--Populating Class
+-------------------------------------------------------------------------------------
+-- 2010 Fall
+INSERT INTO CLASS VALUES
+	 (1,1,'MWF','8:00:00','9:00:00',10210,1,1,201001)
+	,(2,1,'MWF','9:30:00','10:30:00',30110,1,1,201002)
+	,(3,1,'MWF','13:00:00','14:00:00',40210,1,1,201003)
+	,(4,2,'TTh','8:00:00','9:30:00',10210,1,1,201001)
+	,(5,2,'TTh','10:00:00','11:30:00',30110,1,1,201002)
+	,(6,2,'TTh','13:00:00','14:30:00',40210,1,1,201003)
+-- 2010 Winter
+INSERT INTO CLASS VALUES
+	 (7,1,'MWF','8:00:00','9:00:00',40110,2,1,201001)
+	,(8,1,'MWF','9:30:00','10:30:00',30210,2,1,201002)
+	,(9,1,'MWF','13:00:00','14:00:00',40310,2,1,201003)
+	,(10,2,'TTh','8:00:00','9:30:00',40110,2,1,201001)
+	,(11,2,'TTh','10:00:00','11:30:00',30210,2,1,201002)
+	,(12,2,'TTh','13:00:00','14:30:00',40310,2,1,201003)
+-- 2010 Spring
+INSERT INTO Class VALUES
+	 (13,1,'MWF','8:00:00','9:00:00',40410,3,1,201001)
+	,(14,1,'MWF','9:30:00','10:30:00',30310,3,1,201002)
+	,(15,1,'MWF','13:00:00','14:00:00',40510,3,1,201003)
+	,(16,2,'TTh','8:00:00','9:30:00',40410,3,1,201001)
+	,(17,2,'TTh','10:00:00','11:30:00',30310,3,1,201002)
+	,(18,2,'TTh','13:00:00','14:30:00',40510,3,1,201003)
+-- 2010 Summer
+INSERT INTO Class VALUES
+	 (19,1,'MWF','8:00:00','9:00:00',20110,4,1,201001)
+	,(20,1,'MWF','9:30:00','10:30:00',40710,4,1,201002)
+	,(21,1,'MWF','13:00:00','14:00:00',10310,4,1,201003)	
+	,(22,2,'TTh','8:00:00','9:30:00',20110,4,1,201001)
+	,(23,2,'TTh','10:00:00','11:30:00',40710,4,1,201002)
+	,(24,2,'TTh','13:00:00','14:30:00',10310,4,1,201003)	
+-------------------------------------------------------------------------------------
+-- 2011 Fall
+INSERT INTO Class VALUES
+	 (25,1,'MWF','8:00:00','9:00:00',40610,5,1,201001)
+	,(26,1,'MWF','9:30:00','10:30:00',10410,5,1,201001)
+	,(27,1,'MWF','11:00:00','12:00:00',20210,5,1,201001)
+	,(28,1,'MWF','13:00:00','14:00:00',10610,5,2,201002)
+	,(29,1,'MWF','14:30:00','15:30:00',30410,5,3,201003)
+	,(48,1,'MWF','8:00:00','9:00:00',10210,5,2,201002)
+	,(49,1,'MWF','9:30:00','10:30:00',30110,5,2,201002)
+	,(50,1,'MWF','13:00:00','14:00:00',40110,5,3,201003)
+	,(51,1,'MWF','14:30:00','15:30:00',40210,5,3,201003)
+	,(52,2,'TTh','8:00:00','9:30:00',10210,5,1,201101)
+	,(53,2,'TTh','9:30:00','11:00:00',30110,5,1,201101)
+	,(54,2,'TTh','13:00:00','14:30:00',40110,5,2,201102)
+	,(55,2,'TTh','14:30:00','16:00:00',40210,5,2,201102)
 
-create view TermWithClassDetails AS (
-	select 
-		t.Season
-		, t.Year
-		, co.CourseNumber
-		, cl.Section
-		, co.NumUnits
-		, p.FirstName AS ProfessorFirstName
-		, p.LastName AS ProfessorLastName
-		, cl.ClassRoomID
-	from Term t
-	join Class cl on t.TermID=cl.TermID
-	join Course co on cl.CourseID=co.CourseID
-	join Professor p on cl.ProfessorID=p.ProfessorID
-	where t.TermID=51 --fill in actual term in app
-)
-go
+-- 2011 Winter
+INSERT INTO Class VALUES
+	 (30,1,'MWF','8:00:00','9:00:00',10510,6,1,201001)
+	,(31,1,'MWF','9:30:00','10:30:00',41810,6,1,201001)
+	,(32,1,'MWF','11:00:00','12:00:00',40810,6,1,201001)
+	,(33,1,'MWF','13:00:00','14:00:00',41210,6,2,201002)
+	,(34,1,'MWF','14:30:00','15:30:00',41610,6,3,201003)
+	,(56,1,'MWF','8:00:00','9:00:00',10310,6,2,201002)
+	,(57,1,'MWF','9:30:00','10:30:00',30210,6,2,201002)
+	,(58,1,'MWF','13:00:00','14:00:00',40310,6,3,201003)
+	,(59,1,'MWF','14:30:00','15:30:00',40410,6,3,201003)
+	,(60,2,'TTh','8:00:00','9:30:00',10310,6,1,201101)
+	,(61,2,'TTh','9:30:00','11:00:00',30210,6,1,201101)
+	,(62,2,'TTh','13:00:00','14:30:00',40310,6,2,201102)
+	,(63,2,'TTh','14:30:00','16:00:00',40410,6,2,201102)
+	,(64,1,'TTh','8:00:00','9:00:00',20110,6,2,201102)
+	 
+-- 2011 Spring
+INSERT INTO Class VALUES
+	 (35,1,'MWF','8:00:00','9:00:00',10110,7,1,201001)
+	,(36,1,'MWF','9:30:00','10:30:00',41110,7,1,201001)
+	,(37,1,'MWF','11:00:00','12:00:00',41510,7,1,201001)
+	,(38,1,'MWF','13:00:00','14:00:00',40910,7,2,201002)
+	,(39,1,'MWF','14:30:00','15:30:00',11010,7,3,201003)
+	,(65,2,'MWF','16:00:00','17:00:00',10110,7,3,201101)
+	,(66,1,'TTh','8:00:00','9:30:00',40510,7,1,201003)
+	,(67,1,'TTh','10:00:00','11:30:00',30310,7,1,201101)
+	,(68,2,'MWF','13:00:00','14:00:00',30310,7,1,201102)
+	,(70,1,'TTh','13:00:00','14:30:00',40810,7,2,201102)
+	,(69,2,'TTh','14:30:00','16:00:00',40810,7,2,201102)
+	,(71,2,'TTh','16:00:00','17:30:00',40510,7,3,201003)
 
-create view ClassDetails AS (
-	select 
-		co.CourseNumber
-		, cl.Section
-		, t.Season
-		, t.Year
-		, cl.WeekDays
-		, cl.BeginTime
-		, cl.EndTime
-		, co.NumUnits
-		, p.FirstName AS ProfessorFirstName
-		, p.LastName AS ProfessorLastName
-		, cl.ClassRoomID
-	from Class cl
-	join Course co on cl.CourseID=co.CourseID
-	join Term t on cl.TermID=t.TermID
-	join Professor p on cl.ProfessorID=p.ProfessorID
-	where cl.ClassID=51 --fill in actual class in app
-)
-go
---End of file as of initial creation on 3/26/13@21:40
+-- 2011 Summer
+INSERT INTO Class VALUES
+	 (40,1,'MWF','8:00:00','9:00:00',10710,8,1,201001)
+	,(41,1,'MWF','9:30:00','10:30:00',41310,8,1,201001)
+	,(42,1,'MWF','11:00:00','12:00:00',41010,8,2,201002)
+	,(72,1,'TTh','8:00:00','9:30:00',10110,8,2,201002)
+	,(73,1,'TTh','10:00:00','11:30:00',20110,8,3,201003)
+	,(74,1,'MWF','13:00:00','14:00:00',40610,8,2,201002)
+	,(75,2,'TTh','13:00:00','14:30:00',40610,8,3,201003)
+	,(76,1,'MWF','14:30:00','15:30:00',41110,8,4,201101)
+	,(77,2,'TTh','16:00:00','17:30:00',41110,8,4,201101)
 
+-- 2012 Fall
+INSERT INTO Class VALUES
+	 (43,1,'MWF','8:00:00','9:00:00',10910,9,1,201001)
+	,(44,1,'MWF','9:30:00','10:30:00',41410,9,1,201001)
+	,(45,1,'MWF','11:00:00','12:00:00',41710,9,1,201001)
+	,(46,1,'MWF','13:00:00','14:00:00',41910,9,2,201002)
+	,(47,1,'MWF','14:30:00','15:30:00',42110,9,3,201003)
+	,(78,1,'MWF','8:00:00','9:00:00',20210,9,1,201002)
+	,(79,2,'TTh','8:00:00','9:30:00',20210,9,2,201002)
+	,(80,1,'TTh','9:30:00','11:00:00',41510,9,3,201003)
+	,(81,1,'TTh','11:00:00','12:30:00',40710,9,4,201101)
+	,(82,1,'MWF','9:30:00','10:30:00',41210,9,4,201101)
+	,(83,1,'MWF','8:00:00','9:00:00',10210,9,4,201101)
+	,(84,1,'MWF','9:30:00','10:30:00',30110,9,4,201101)
+	,(85,1,'MWF','13:00:00','14:00:00',40110,9,4,201101)
+	,(86,1,'MWF','14:30:00','15:30:00',40210,9,5,201102)
+	,(87,2,'TTh','8:00:00','9:30:00',10210,9,5,201102)
+	,(88,2,'TTh','9:30:00','11:00:00',30110,9,5,201102)
+	,(89,2,'TTh','13:00:00','14:30:00',40110,9,4,201201)
+	,(90,2,'TTh','14:30:00','16:00:00',40210,9,4,201201)
+
+-- 2012 Winter
+-- 2012 Spring
+-- 2012 Summer
+	
