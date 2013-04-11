@@ -37,6 +37,7 @@ INSERT INTO StudentsInClass VALUES
 ,(1,45,'B-',1)
 ,(1,46,'A',1)
 ,(1,47,'C+',1)
+
 -- Student 2 => GRADUATED
 INSERT INTO StudentsInClass VALUES
  (2,1,'A-',1)
@@ -317,6 +318,8 @@ INSERT INTO StudentsInClass VALUES
 
 
 -- Student 12
+
+
 INSERT INTO StudentsInClass VALUES
  (12,48,'A',1)
 ,(12,49,'A',1)
@@ -503,3 +506,72 @@ INSERT INTO StudentsInClass VALUES
 ,(20,81,'B',1)
 ,(20,82,'B',1)
 
+-- Student 21
+INSERT INTO StudentsInClass VALUES
+ (21,83,'A',1)
+,(21,84,'C',1)
+,(21,85,'C',1)
+,(21,86,'A',1)
+
+-- Student 22
+INSERT INTO StudentsInClass VALUES
+ (22,83,'B-',1)
+,(22,84,'B',1)
+,(22,85,'C',1)
+,(22,86,'B+',1)
+
+-- Student 23
+INSERT INTO StudentsInClass VALUES
+ (23,83,'A',1)
+,(23,84,'B',1)
+,(23,85,'B-',1)
+,(23,86,'A',1)
+
+-- Student 24
+INSERT INTO StudentsInClass VALUES
+ (24,83,'B+',1)
+,(24,84,'A',1)
+,(24,85,'B',1)
+,(24,86,'A',1)
+
+-- Student 25
+INSERT INTO StudentsInClass VALUES
+ (25,83,'B-',1)
+,(25,84,'B',1)
+,(25,85,'B-',1)
+,(25,86,'B-',1)
+
+-- Student 26
+INSERT INTO StudentsInClass VALUES
+ (26,87,'A',1)
+,(26,88,'B',1)
+,(26,89,'A',1)
+,(26,90,'C',1)
+
+-- Student 27
+INSERT INTO StudentsInClass VALUES
+ (27,87,'A',1)
+,(27,88,'B',1)
+,(27,89,'B+',1)
+,(27,90,'C-',1)
+
+-- Student 28
+INSERT INTO StudentsInClass VALUES
+ (28,87,'A',1)
+,(28,88,'B',1)
+,(28,89,'B+',1)
+,(28,90,'A-',1)
+
+-- Student 29
+INSERT INTO StudentsInClass VALUES
+ (29,87,'A',1)
+,(29,88,'B',1)
+,(29,89,'B+',1)
+,(29,90,'C-',1)
+
+-- Student 30
+INSERT INTO StudentsInClass VALUES
+ (30,87,'A',1)
+,(30,88,'B',1)
+,(30,89,'B+',1)
+,(30,90,'C-',1)
