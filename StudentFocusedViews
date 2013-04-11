@@ -44,3 +44,27 @@ join AllCompletedUnitsPerTermPerStudent a on a.StudentID=s.StudentID
 join StudentStartYear ss on ss.StudentID=s.StudentID
 join UnitsInCurriculum u on u.Year=ss.Year
 group by s.StudentID
+go
+
+
+--This view shows all the metrics for Student Focused Views
+CREATE VIEW StudentFocusedView as
+select s.StudentID,
+  (SELECT (SUM(u.NumUnits)-SUM(a.UnitsCompleted))/20 + 1
+		from Student st
+		join AllCompletedUnitsPerTermPerStudent a on a.StudentID=st.StudentID
+		join StudentStartYear ss on ss.StudentID=st.StudentID
+		join UnitsInCurriculum u on u.Year=ss.Year
+		where s.StudentID=st.StudentID) as MinQuartersToGrad,
+	(Select COUNT(sic.ClassID)
+		from Student st
+		left join StudentsInClass sic on sic.StudentID=st.StudentID
+		where s.StudentID=st.StudentID) as NumClassesTaken,
+	(SELECT SUM(a.UnitsCompleted)
+		from AllCompletedUnitsPerTermPerStudent a
+		where a.StudentID=s.StudentID) as TotalUnitsCompleted,
+	(SELECT AVG(a.UnitsCompleted)
+		from AllCompletedUnitsPerTermPerStudent a
+		where a.StudentID=s.StudentID) as AvgUnitsCompleted
+from Student s
+go
